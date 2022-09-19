@@ -52,11 +52,11 @@ abstract class Storage
 {
     abstract public function create(array $object);
 
-    abstract public function read($id, $slag): array;
+    abstract public function read($id, $slug): array;
 
-    abstract public function update($id, $slag, $object);
+    abstract public function update($id, $slug, $object);
 
-    abstract public function delete($id, $slag);
+    abstract public function delete($id, $slug);
 
     abstract public function list_(): array;
 }
@@ -88,21 +88,40 @@ abstract class User
 //4. Реализую класс "Файл" (FileStorage) для абстрактного класса Storage
 class FileStorage extends Storage
 {
-    public function create(array $object)
+    public function create($object)
     {
+        $fileName = $object['slug'] . '_' . date('Y-m-d H:i:s');
+        $i = 1;
+        while (file_exists($fileName)) {
+            $fileName . '_' . $i;
+            $i++;
+        }
+        $object['slug'] = $fileName;
+        $serializedText = serialize($object);
+        file_put_contents($object['slug'], $serializedText);
+        return $object['slug'];
     }
 
-    public function read($id, $slag): array
+    public function read($id, $slug): array
+    {
+        return unserialize(file_get_contents($slug));
+    }
 
-     public function update($id, $slag, $object)
-     {
-     }
+    public function update($id, $slug, $object)
+    {
+        file_put_contents($slug, serialize($object));
+    }
 
-     public function delete($id, $slag)
-     {
-     }
+    public function delete($id, $slug)
+    {
+        unlink($slug);
+    }
 
-     public function list_(): array
-     {
-     }
+    public function list_(): array
+    {
+        $allFiles = array();
+
+        foreach (scandir('./') as $item) $allFiles[] = unserialize($item);
+    }
+
 }
