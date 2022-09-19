@@ -122,6 +122,7 @@ class FileStorage extends Storage
         $allFiles = array();
 
         foreach (scandir('./') as $item) $allFiles[] = unserialize($item);
+        return $allFiles;
     }
 
 }
