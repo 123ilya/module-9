@@ -50,7 +50,7 @@ class TelegraphText
 //1. Создаю абстрактный класс для хранилища
 abstract class Storage
 {
-    abstract public function create(array $object);
+    abstract public function create( $object);
 
     abstract public function read($id, $slug): array;
 
@@ -88,41 +88,56 @@ abstract class User
 //4. Реализую класс "Файл" (FileStorage) для абстрактного класса Storage
 class FileStorage extends Storage
 {
+    //create получает на вход obj. Изменяет slug, серрилизует и записывает
+    //в файл с именем slug,  возвращает slug
     public function create($object)
     {
-        $fileName = $object['slug'] . '_' . date('Y-m-d H:i:s');
+        $fileName = $object->slug . '_' . date('Y-m-d H:i:s');
         $i = 1;
         while (file_exists($fileName)) {
             $fileName . '_' . $i;
             $i++;
         }
-        $object['slug'] = $fileName;
+        $object->slug = $fileName;
         $serializedText = serialize($object);
-        file_put_contents($object['slug'], $serializedText);
-        return $object['slug'];
+        file_put_contents($object->slug, $serializedText);
+        return $object->slug;
     }
-
+//--------------------------------------------------
+//read возвращает десириализованный массив
     public function read($id, $slug): array
     {
         return unserialize(file_get_contents($slug));
     }
-
+//-------------------------------------------------
+//update - записывает или перезаписывает содержание файла
     public function update($id, $slug, $object)
     {
         file_put_contents($slug, serialize($object));
     }
-
+//---------------------------------------------------
+//delete Удаляет файл
     public function delete($id, $slug)
     {
         unlink($slug);
     }
-
+//------------------------------------------------------
+//Возвращает массив объектов, из созданных файлов
     public function list_(): array
     {
         $allFiles = array();
 
-        foreach (scandir('./') as $item) $allFiles[] = unserialize($item);
+        foreach (scandir('./') as $item) {
+            $allFiles[] = unserialize($item);
+        }
         return $allFiles;
     }
 
 }
+//--------------------------------------------------------------------------
+$text = new TelegraphText('ilya', 'C:\Users\sobolev_ia\Desktop\PHP study\module-9\module-9\.test.txt');
+$text->editText('titletitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
+var_dump($text);
+$fileStorage = new FileStorage();
+$fileStorage->create($text);
+
