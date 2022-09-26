@@ -2,11 +2,11 @@
 
 class TelegraphText
 {
-    public $text;
-    public $title;
-    public $author;
-    public $published;
-    public $slug;
+    public $text; //Сам текст
+    public $title; //Заголовок текста
+    public $author; //Автор
+    public $published; //Дата создания объекта
+    public $slug; //Имя файла
 
     public function __construct($author, $slug)
     {
@@ -15,7 +15,8 @@ class TelegraphText
         $this->published = date('Y-m-d H:i:s');
     }
 
-    public function storeText()
+    public function storeText() // На основе полей объекта формирует массив, серриализует его, а затем
+        //записывает в файл.
     {
         $post = [
             'title' => $this->title,
@@ -27,7 +28,7 @@ class TelegraphText
         file_put_contents($this->slug, $serializedPost);
     }
 
-    public function loadText()
+    public function loadText() //Выгружает содержимое из файла. И на основе выгруженного массива обновляет поля объекта.
     {
         $loadedPost = unserialize(file_get_contents($this->slug));
         if (filesize($this->slug) !== 0) {
@@ -39,7 +40,7 @@ class TelegraphText
         }
     }
 
-    public function editText($title, $text)
+    public function editText($title, $text)//Изменяет содержимое полей объекта title и text
     {
         $this->title = $title;
         $this->text = $text;
@@ -47,93 +48,44 @@ class TelegraphText
 }
 
 
-//1. Создаю абстрактный класс для хранилища
+//1.Абстрактный класс для хранилища
 abstract class Storage
 {
-    abstract public function create( $object);
+    abstract public function create($object);//создает объект в хранилище
 
-    abstract public function read($id, $slug): array;
+    abstract public function read($id, $slug): array;//получает объект из хранилища
 
-    abstract public function update($id, $slug, $object);
+    abstract public function update($id, $slug, $object);//обновляет существующий объект в хранилище
 
-    abstract public function delete($id, $slug);
+    abstract public function delete($id, $slug);//удаляет объект из хранмилища
 
-    abstract public function list_(): array;
+    abstract public function list_(): array;//возвращает массив всех объектов в хранилище
 }
 
-//2. Создаю абстрактный класс для представления
+//2. Абстрактный класс для представления
 abstract class View
 {
     public $storage;
 
     public function _construct($object)
     {
-        $this->storage = $object;
+        $this->storage = $object;//Присваивает полю $storage значение объекта, созданного подклассом Storage
     }
 
-    abstract public function displayTextById($id);
+    abstract public function displayTextById($id);//Выводит текст по id
 
-    abstract public function displayTextByUrl($url);
+    abstract public function displayTextByUrl($url);//Выводитт текст по url
 
 }
 
-//3. Создаю абстрактный класс User
+//3.Абстрактный класс User
 abstract class User
 {
     public $id, $name, $role;
 
-    abstract public function getTextToEdit();
+    abstract public function getTextToEdit();//Выводит список текстов, доступных пользователю для редактирования
 }
 
-//4. Реализую класс "Файл" (FileStorage) для абстрактного класса Storage
-class FileStorage extends Storage
-{
-    //create получает на вход obj. Изменяет slug, серрилизует и записывает
-    //в файл с именем slug,  возвращает slug
-    public function create($object)
-    {
-        $fileName = $object->slug . '_' . date('Y-m-d H:i:s');
-        $i = 1;
-        while (file_exists($fileName)) {
-            $fileName . '_' . $i;
-            $i++;
-        }
-        $object->slug = $fileName;
-        $serializedText = serialize($object);
-        file_put_contents($object->slug, $serializedText);
-        return $object->slug;
-    }
-//--------------------------------------------------
-//read возвращает десириализованный массив
-    public function read($id, $slug): array
-    {
-        return unserialize(file_get_contents($slug));
-    }
-//-------------------------------------------------
-//update - записывает или перезаписывает содержание файла
-    public function update($id, $slug, $object)
-    {
-        file_put_contents($slug, serialize($object));
-    }
-//---------------------------------------------------
-//delete Удаляет файл
-    public function delete($id, $slug)
-    {
-        unlink($slug);
-    }
-//------------------------------------------------------
-//Возвращает массив объектов, из созданных файлов
-    public function list_(): array
-    {
-        $allFiles = array();
-
-        foreach (scandir('./') as $item) {
-            $allFiles[] = unserialize($item);
-        }
-        return $allFiles;
-    }
-
-}
 //--------------------------------------------------------------------------
 $text = new TelegraphText('ilya', 'C:\Users\sobolev_ia\Desktop\PHP study\module-9\module-9\.test.txt');
 $text->editText('titletitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
