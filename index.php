@@ -2,11 +2,11 @@
 
 class TelegraphText
 {
-    public $text; //Сам текст
-    public $title; //Заголовок текста
-    public $author; //Автор
-    public $published; //Дата создания объекта
-    public $slug; //Имя файла
+    public string$text; //Сам текст
+    public string$title; //Заголовок текста
+    public string$author; //Автор
+    public string$published; //Дата создания объекта
+    public string$slug; //Имя файла
 
     public function __construct($author, $slug)
     {
@@ -15,7 +15,7 @@ class TelegraphText
         $this->published = date('Y-m-d H:i:s');
     }
 
-    public function storeText() // На основе полей объекта формирует массив, серриализует его, а затем
+    public function storeText():void // На основе полей объекта формирует массив, серриализует его, а затем
         //записывает в файл.
     {
         $post = [
@@ -40,7 +40,7 @@ class TelegraphText
         }
     }
 
-    public function editText($title, $text)//Изменяет содержимое полей объекта title и text
+    public function editText($title, $text):void//Изменяет содержимое полей объекта title и text
     {
         $this->title = $title;
         $this->text = $text;
@@ -65,12 +65,12 @@ abstract class Storage
 //2. Абстрактный класс для представления
 abstract class View
 {
-    public $storage;
+    public object $storage;
 
-    public function _construct($object)
-    {
-        $this->storage = $object;//Присваивает полю $storage значение объекта, созданного подклассом Storage
-    }
+//    public function _construct($object)
+//    {
+//        $this->storage = $object;//Присваивает полю $storage значение объекта, созданного подклассом Storage
+//    }
 
     abstract public function displayTextById($id);//Выводит текст по id
 
@@ -81,15 +81,40 @@ abstract class View
 //3.Абстрактный класс User
 abstract class User
 {
-    public $id, $name, $role;
+    public string$id, $name, $role;
 
     abstract public function getTextToEdit();//Выводит список текстов, доступных пользователю для редактирования
 }
 
 //--------------------------------------------------------------------------
-$text = new TelegraphText('ilya', 'C:\Users\sobolev_ia\Desktop\PHP study\module-9\module-9\.test.txt');
-$text->editText('titletitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
-var_dump($text);
-$fileStorage = new FileStorage();
-$fileStorage->create($text);
+class FileStorage extends Storage{
+    public function create($object)
+    {
+        $fileName = $object->$slug;////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+    public function delete($id, $slug)
+    {
+        // TODO: Implement delete() method.
+    }
+    public function list_(): array
+    {
+        // TODO: Implement list_() method.
+    }
+    public function read($id, $slug): array
+    {
+        // TODO: Implement read() method.
+    }
+    public function update($id, $slug, $object)
+    {
+        // TODO: Implement update() method.
+    }
+
+}
+//--------------------------------------------------------------------------
+$text = new TelegraphText('ilya', 'test.txt');
+$text->editText('testTitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
+$text->storeText();
+$text->editText('newTitle', 'edittedgggggggggggggggggggggggggggggggg text');
+$text->storeText();
+
 
