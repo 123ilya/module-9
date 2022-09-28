@@ -2,11 +2,11 @@
 
 class TelegraphText
 {
-    public string$text; //Сам текст
-    public string$title; //Заголовок текста
-    public string$author; //Автор
-    public string$published; //Дата создания объекта
-    public string$slug; //Имя файла
+    public string $text; //Сам текст
+    public string $title; //Заголовок текста
+    public string $author; //Автор
+    public string $published; //Дата создания объекта
+    public string $slug; //Имя файла
 
     public function __construct($author, $slug)
     {
@@ -15,7 +15,7 @@ class TelegraphText
         $this->published = date('Y-m-d H:i:s');
     }
 
-    public function storeText():void // На основе полей объекта формирует массив, серриализует его, а затем
+    public function storeText(): void // На основе полей объекта формирует массив, серриализует его, а затем
         //записывает в файл.
     {
         $post = [
@@ -40,7 +40,7 @@ class TelegraphText
         }
     }
 
-    public function editText($title, $text):void//Изменяет содержимое полей объекта title и text
+    public function editText($title, $text): void//Изменяет содержимое полей объекта title и text
     {
         $this->title = $title;
         $this->text = $text;
@@ -51,7 +51,7 @@ class TelegraphText
 //1.Абстрактный класс для хранилища
 abstract class Storage
 {
-    abstract public function create($object);//создает объект в хранилище
+    abstract public function create(&$object);//создает объект в хранилище
 
     abstract public function read($id, $slug): array;//получает объект из хранилища
 
@@ -81,40 +81,56 @@ abstract class View
 //3.Абстрактный класс User
 abstract class User
 {
-    public string$id, $name, $role;
+    public string $id, $name, $role;
 
     abstract public function getTextToEdit();//Выводит список текстов, доступных пользователю для редактирования
 }
 
 //--------------------------------------------------------------------------
-class FileStorage extends Storage{
-    public function create($object)
+class FileStorage extends Storage
+{
+    public function create(&$object)
     {
-        $fileName = $object->$slug;////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        $count = 1;
+        $fileName = $object->slug . '_' . date('Y-m-d');
+        $name =$fileName;
+        while (file_exists($name)) {
+            $name = $fileName . '_'.$count;
+            $count++;
+        }
+        $object->slug = $name;
+        $serializedObject = serialize($object);
+        file_put_contents($object->slug, $serializedObject);
     }
+
     public function delete($id, $slug)
     {
         // TODO: Implement delete() method.
     }
+
     public function list_(): array
     {
         // TODO: Implement list_() method.
+        return [8, 9];
     }
+
     public function read($id, $slug): array
     {
         // TODO: Implement read() method.
+        return [8, 0];
     }
+
     public function update($id, $slug, $object)
     {
         // TODO: Implement update() method.
     }
 
 }
-//--------------------------------------------------------------------------
-$text = new TelegraphText('ilya', 'test.txt');
-$text->editText('testTitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
-$text->storeText();
-$text->editText('newTitle', 'edittedgggggggggggggggggggggggggggggggg text');
-$text->storeText();
 
+//--------------------------------------------------------------------------
+$text = new TelegraphText('ilya', 'test');
+$text->editText('testTitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf');
+
+$testStore = new FileStorage();
+$testStore->create($text);
 
