@@ -53,9 +53,9 @@ abstract class Storage
 {
     abstract public function create(&$object);//создает объект в хранилище
 
-    abstract public function read($id, $slug): array;//получает объект из хранилища
+    abstract public function read($slug): object;//получает объект из хранилища
 
-    abstract public function update($id, $slug, $object);//обновляет существующий объект в хранилище
+    abstract public function update($slug, $object);//обновляет существующий объект в хранилище
 
     abstract public function delete($id, $slug);//удаляет объект из хранмилища
 
@@ -87,23 +87,24 @@ abstract class User
 }
 
 //--------------------------------------------------------------------------
-class FileStorage extends Storage
+class FileStorage extends Storage // Метод серриализует и записывает в файл, объект класса TelegraphText
 {
-    public function create(&$object)
+    public function create(&$object): string
     {
         $count = 1;
         $fileName = $object->slug . '_' . date('Y-m-d');
-        $name =$fileName;
+        $name = $fileName;
         while (file_exists($name)) {
-            $name = $fileName . '_'.$count;
+            $name = $fileName . '_' . $count;
             $count++;
         }
         $object->slug = $name;
         $serializedObject = serialize($object);
         file_put_contents($object->slug, $serializedObject);
+        return $object->slug;
     }
 
-    public function delete($id, $slug)
+    public function delete($id, $slug) //
     {
         // TODO: Implement delete() method.
     }
@@ -114,15 +115,14 @@ class FileStorage extends Storage
         return [8, 9];
     }
 
-    public function read($id, $slug): array
+    public function read($slug): object //Возвращает дессиаризованный объект из файла с именем $slug
     {
-        // TODO: Implement read() method.
-        return [8, 0];
+        return unserialize(file_get_contents($slug));
     }
 
-    public function update($id, $slug, $object)
+    public function update($slug, $object)
     {
-        // TODO: Implement update() method.
+
     }
 
 }
@@ -133,4 +133,5 @@ $text->editText('testTitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf')
 
 $testStore = new FileStorage();
 $testStore->create($text);
+$testStore->read('test_2022-09-29');
 
