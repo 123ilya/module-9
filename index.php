@@ -57,7 +57,7 @@ abstract class Storage
 
     abstract public function update($slug, $object);//обновляет существующий объект в хранилище
 
-    abstract public function delete($id, $slug);//удаляет объект из хранмилища
+    abstract public function delete($slug);//удаляет объект из хранмилища
 
     abstract public function list_(): array;//возвращает массив всех объектов в хранилище
 }
@@ -86,7 +86,6 @@ abstract class User
     abstract public function getTextToEdit();//Выводит список текстов, доступных пользователю для редактирования
 }
 
-//--------------------------------------------------------------------------
 class FileStorage extends Storage // Метод серриализует и записывает в файл, объект класса TelegraphText
 {
     public function create(&$object): string
@@ -104,15 +103,23 @@ class FileStorage extends Storage // Метод серриализует и за
         return $object->slug;
     }
 
-    public function delete($id, $slug) //
+    public function delete($slug) // Удаляет файл с именем $slug
     {
-        // TODO: Implement delete() method.
+        unlink($slug);
     }
 
-    public function list_(): array
+    public function list_(
+    ): array //Возвращает массив объектов, полученных при дессиаризации содержимого файлов в дирректории.
     {
-        // TODO: Implement list_() method.
-        return [8, 9];
+        $resultList = [];//Результирующий массив
+        $list = scandir('./');//Перечень всех файлов и папок, находящихся в дирректории
+        foreach ($list as $item) {
+            if ($item !== '.' && $item !== '..' && !is_dir($item) && $item !== 'index.php') {
+                $content = file_get_contents($item);
+                $resultList[] = unserialize($content);
+            }
+        }
+        return $resultList;
     }
 
     public function read($slug): object //Возвращает дессиаризованный объект из файла с именем $slug
@@ -120,9 +127,10 @@ class FileStorage extends Storage // Метод серриализует и за
         return unserialize(file_get_contents($slug));
     }
 
-    public function update($slug, $object)
+    public function update($slug, $object) //Перезаписывает файл с именем $slug серриализованным объектом $object
     {
-
+        $serializedObject = serialize($object);
+        file_put_contents($slug, $serializedObject);
     }
 
 }
@@ -133,5 +141,4 @@ $text->editText('testTitle', 'swlihsliuhfwleihfliwuhfwleiuhfliwuhfliwuhfwleihf')
 
 $testStore = new FileStorage();
 $testStore->create($text);
-$testStore->read('test_2022-09-29');
-
+var_dump($testStore->list_());
